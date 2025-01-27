@@ -1,0 +1,16 @@
+[
+{
+  "modid": "qct",
+  "name": "Qcy Custom Timers",
+  "description": "Create custom timers, triggered by chat, or by keybind.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Qcy"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
