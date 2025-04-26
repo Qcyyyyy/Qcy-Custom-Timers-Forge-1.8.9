@@ -24,7 +24,7 @@ import java.util.Date;
 public class qct
 {
     public static final String MODID = "qct";
-    public static final String VERSION = "1.0";
+    public static final String VERSION = "1.1";
     public static QCTConfig config = QCTConfig.load();
 
     @EventHandler
@@ -36,6 +36,7 @@ public class qct
         ClientCommandHandler.instance.registerCommand(new QCTPosCommand());
     }
 
+    // Renders timer GUI
     @SubscribeEvent
     public void onRenderHUD(RenderGameOverlayEvent.Post event) {
         if (config.timerList.size() > 0) {
@@ -60,8 +61,8 @@ public class qct
                 String timerString = "";
                 int timerColor;
                 if (secondsLeft >= 0) { // Normal timer display
-                    timerString = timer.getTimerName() + " | " + secondsLeft;
-                    timerColor = 0xFFFFFF;
+                    timerString = timer.getTimerName() + ": " + timeFormatter(secondsLeft);
+                    timerColor = 0x33ccff;
                     renderStringList.add(timerString);
                     renderColorList.add(timerColor);
                     if (maxWidth < mc.fontRendererObj.getStringWidth(timerString)) {
@@ -71,7 +72,7 @@ public class qct
 
                 else if (secondsLeft < 0 && secondsLeft > -2) { // Timer reaches 0 plays sound and is displayed in red
                     ResourceLocation soundLocation = new ResourceLocation("minecraft", "random.orb");
-                    timerString = timer.getTimerName() + " | 0";
+                    timerString = timer.getTimerName() + ": 0";
                     timerColor = 0xFF6666;
                     renderStringList.add(timerString);
                     renderColorList.add(timerColor);
@@ -82,7 +83,7 @@ public class qct
                 }
 
                 else if (secondsLeft <= -2 && secondsLeft > -4) { // Just red display after sound + red
-                    timerString = timer.getTimerName() + " | 0";
+                    timerString = timer.getTimerName() + ": 0";
                     timerColor = 0xFF6666;
                     renderStringList.add(timerString);
                     renderColorList.add(timerColor);
@@ -105,6 +106,41 @@ public class qct
         }
     }
 
+
+    // Formats time strings into a nice to look at format
+    private String timeFormatter(long secondsLeft) {
+        long days = secondsLeft / 86400;
+        secondsLeft %= 86400;
+        long hours = secondsLeft / 3600;
+        secondsLeft %= 3600;
+        long minutes = secondsLeft / 60;
+        secondsLeft %= 60;
+
+        StringBuilder sb = new StringBuilder();
+
+        if (days > 0) {
+            sb.append(days).append(":");
+            sb.append(String.format("%02d:%02d:%02d", hours, minutes, secondsLeft));
+        }
+
+        else if (hours > 0) {
+            sb.append(hours).append(":");
+            sb.append(String.format("%02d:%02d", minutes, secondsLeft));
+        }
+
+        else if (minutes > 0) {
+            sb.append(minutes).append(":");
+            sb.append(String.format("%02d", secondsLeft));
+        }
+
+        else {
+            sb.append(secondsLeft);
+        }
+
+        return sb.toString();
+    }
+
+    // Check chat messages for all message triggers
     @SubscribeEvent
     public void onChatMessage(ClientChatReceivedEvent event) {
         String message = event.message.getUnformattedText();
