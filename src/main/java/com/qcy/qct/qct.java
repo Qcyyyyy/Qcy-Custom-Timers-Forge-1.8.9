@@ -16,6 +16,7 @@ import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,6 +27,7 @@ public class qct
     public static final String MODID = "qct";
     public static final String VERSION = "1.1";
     public static QCTConfig config = QCTConfig.load();
+    public static boolean shouldOpenGui = false;
 
     @EventHandler
     public void init(FMLInitializationEvent event)
@@ -34,6 +36,16 @@ public class qct
         ClientCommandHandler.instance.registerCommand(new QCTCommand());
         ClientCommandHandler.instance.registerCommand(new QCTClearCommand());
         ClientCommandHandler.instance.registerCommand(new QCTPosCommand());
+    }
+
+    @SubscribeEvent // Weird but this is the only simple way I could figure out how to delay opening the gui so it works with a command (Got cut off while still in chat gui)
+    public void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            if (shouldOpenGui) {
+                Minecraft.getMinecraft().displayGuiScreen(new QCTGui());
+                shouldOpenGui = false;
+            }
+        }
     }
 
     // Renders timer GUI
@@ -144,6 +156,8 @@ public class qct
     @SubscribeEvent
     public void onChatMessage(ClientChatReceivedEvent event) {
         String message = event.message.getUnformattedText();
+
+        config = QCTConfig.load();
 
         for (int i = 0; i < config.msgTriggerList.size(); i++) {
             if (message.contains(config.msgTriggerList.get(i).getStringToTrigger())) {
